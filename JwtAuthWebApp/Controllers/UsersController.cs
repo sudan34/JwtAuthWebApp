@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JwtAuthWebApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class UsersController : ControllerBase
@@ -18,8 +19,7 @@ namespace JwtAuthWebApp.Controllers
         }
 
         // Create User
-        [Authorize]
-        [HttpPost]
+        [HttpPost("CreateUser")]
         public async Task<IActionResult> CreateUser([FromBody] User user)
         {
             if (user == null || string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.PasswordHash))
@@ -34,7 +34,6 @@ namespace JwtAuthWebApp.Controllers
         }
 
         // Read User by ID
-        [Authorize]
         [HttpGet("GetById")]
         public async Task<IActionResult> GetUserById([FromQuery] int id)
         {
@@ -55,7 +54,6 @@ namespace JwtAuthWebApp.Controllers
         }
 
         // Read All Users
-        [Authorize]
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -90,7 +88,6 @@ namespace JwtAuthWebApp.Controllers
         }
 
         // Delete User
-        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {

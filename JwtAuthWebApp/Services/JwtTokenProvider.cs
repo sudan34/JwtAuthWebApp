@@ -18,7 +18,13 @@ namespace JwtAuthWebApp.Services
 
         public string GenerateJwtToken(User user)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]));
+            var secretKey = _configuration["JwtSettings:SecretKey"];
+            if (string.IsNullOrEmpty(secretKey))
+            {
+                throw new ArgumentNullException(nameof(secretKey), "JWT Secret Key is missing in configuration.");
+            }
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
@@ -26,12 +32,17 @@ namespace JwtAuthWebApp.Services
             new Claim(ClaimTypes.Name, user.Username),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
         };
+            var expiryMinutes = _configuration["JwtSettings:TokenExpiryMinutes"];
+            if (string.IsNullOrEmpty(expiryMinutes) || !double.TryParse(expiryMinutes, out var tokenExpiry))
+            {
+                tokenExpiry = 60;  // Default to 60 minutes if not set
+            }
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["JwtSettings:Issuer"],
                 audience: _configuration["JwtSettings:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(double.Parse(_configuration["JwtSettings:TokenExpiryMinutes"])),
+                expires: DateTime.UtcNow.AddMinutes(tokenExpiry),
                 signingCredentials: credentials
             );
 

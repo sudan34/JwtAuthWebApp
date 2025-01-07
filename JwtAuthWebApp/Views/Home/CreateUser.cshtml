@@ -1,0 +1,52 @@
+﻿@{
+    ViewData["Title"] = "Create User";
+}
+<h2>Create User</h2>
+<div class="container mt-5">
+    <form id="createUserForm">
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required />
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Create User</button>
+    </form>
+    <div id="response" class="mt-3"></div>
+</div>
+
+<script>
+    document.getElementById('createUserForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        const token = localStorage.getItem('token'); // Retrieve JWT from localStorage
+
+        const response = await fetch('/api/User/CreateUser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // Add Bearer token
+            },
+            body: JSON.stringify({ username, passwordHash: password })
+        });
+
+        const result = await response.json();
+        const responseDiv = document.getElementById('response');
+
+        if (response.ok) {
+            responseDiv.innerHTML = `
+                <div class="alert alert-success">
+                    User created successfully. ID: ${result.id}
+                </div>`;
+        } else {
+            responseDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    ${result.message || 'Failed to create user.'}
+                </div>`;
+        }
+    });
+</script>

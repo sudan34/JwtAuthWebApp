@@ -1,0 +1,62 @@
+﻿@{
+    ViewData["Title"] = "Login";
+}
+<h2>Login</h2>
+<div class="container mt-5">
+    <form id="loginForm" method="post">
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required />
+        </div>
+        <br />
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+    <div id="response" class="mt-3"></div>
+</div>
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        const response = await fetch('/api/Auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.json();
+        const responseDiv = document.getElementById('response');
+
+       if (response.ok) {
+            localStorage.setItem('token', result.token); // Save JWT in localStorage
+            responseDiv.innerHTML = `
+                <div class="alert alert-success">
+                    Login successful. Redirecting to Create User page...
+                </div>`;
+            setTimeout(() => window.location.href = '/Users/CreateUser', 2000); // Redirect to CreateUser view
+        } else {
+            responseDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    ${result.message || 'Login failed.'}
+                </div>`;
+        }
+
+        // if (response.ok) {
+        //     responseDiv.innerHTML = `
+        //         <div class="alert alert-success">
+        //             <p>Login successful!</p>
+        //             <p>Token: ${result.token}</p>
+        //         </div>`;
+        // } else {
+        //     responseDiv.innerHTML = `
+        //         <div class="alert alert-danger">
+        //             ${result.message || 'Login failed.'}
+        //         </div>`;
+        // }
+    });
+</script>
